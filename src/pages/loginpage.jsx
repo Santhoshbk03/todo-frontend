@@ -5,7 +5,7 @@ import "../styles/loginpage.css";
 import axios from "axios";
 import { baseurl } from "../helpers/url";
 import { useNavigate } from "react-router-dom";
-import { loginservice } from "../service/groupservice";
+import { loginService, loginservice } from "../service/groupservice";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -15,18 +15,15 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-         const responce = await loginservice({
-      email,
-      password,
-    })
-    localStorage.setItem("token", responce.data.user.token);
-    localStorage.setItem("userdetails", responce.data.user.data);
-    if (responce.status == 200) navigate("/dashboard");
-    message.success("login Succesfull")
+      const res = await loginService(values);
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userdetails", JSON.stringify(res.data.data));
+      if (responce.status == 200) navigate("/dashboard");
+      message.success("login Succesfull");
     } catch (error) {
-        message.error(error.message)
+      message.error(error.message);
     }
-   
   };
 
   return (
@@ -40,8 +37,6 @@ const LoginPage = () => {
       <div className='login-container'>
         <div className='login-form-side'>
           <div className='login-form-wrapper'>
-
-
             {/* Heading */}
             <h1 className='welcome-title'>Welcome Back</h1>
             <p className='welcome-subtitle'>
