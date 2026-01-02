@@ -5,6 +5,7 @@ import "../styles/loginpage.css";
 import axios from "axios";
 import { baseurl } from "../helpers/url";
 import { useNavigate } from "react-router-dom";
+import { loginservice } from "../service/groupservice";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,10 +15,10 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-         const responce = await axios.post(`${baseurl}/auth/login`, {
+         const responce = await loginservice({
       email,
       password,
-    });
+    })
     localStorage.setItem("token", responce.data.user.token);
     localStorage.setItem("userdetails", responce.data.user.data);
     if (responce.status == 200) navigate("/dashboard");

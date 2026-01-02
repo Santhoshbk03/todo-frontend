@@ -35,3 +35,11 @@ export const updateTaskApi = (id, data) =>
 
 export const deleteTaskApi = (id) =>
   axios.delete(`${baseurl}/tasks/${id}`, getAuthHeader());
+
+
+export const fetchDashboardservice = (id) =>
+  axios.get(`${baseurl}/dashboard`, getAuthHeader());
+
+
+export const loginservice = (body) =>
+  axios.post(`${baseurl}/auth/login`,body);

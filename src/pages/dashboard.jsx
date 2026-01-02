@@ -33,6 +33,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { baseurl } from "../helpers/url";
+import { fetchDashboardservice } from "../service/groupservice";
 
 const { Title, Text } = Typography;
 
@@ -49,9 +50,9 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${baseurl}/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetchDashboardservice();
+
+      
       if (!response.ok) throw new Error("Failed to fetch dashboard");
       const result = await response.json();
       setData(result);
