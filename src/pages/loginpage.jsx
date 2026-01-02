@@ -2,27 +2,80 @@ import React, { useState } from "react";
 import { Input, Button, Checkbox, message } from "antd";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import "../styles/loginpage.css";
-import axios from "axios";
-import { baseurl } from "../helpers/url";
 import { useNavigate } from "react-router-dom";
-import { loginService, loginservice } from "../service/groupservice";
+import { loginService } from "../service/auth.service";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    try {
-      const res = await loginService(values);
+    // Validation
+    if (!email || !password) {
+      message.error("Please enter both email and password");
+      return;
+    }
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userdetails", JSON.stringify(res.data.data));
-      if (responce.status == 200) navigate("/dashboard");
-      message.success("login Succesfull");
+    if (!email.includes("@")) {
+      message.error("Please enter a valid email address");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const values = {
+        email: email,
+        password: password,
+      };
+
+      const response = await loginService(values);
+      console.log(response.data.user.token);
+      
+
+      if (response.data.user.token) {
+        localStorage.setItem("token", response.data.user.token);
+        
+        if (response.data.data) {
+          localStorage.setItem("userdetails", JSON.stringify(response.data.data));
+        } else if (response.data.user) {
+          localStorage.setItem("userdetails", JSON.stringify(response.data.user));
+        }
+
+        message.success("Login Successful");
+        
+        // Fixed: Use === instead of ==, and check response status correctly
+        if (response.status === 200) {
+          navigate("/dashboard");
+        }
+      } else {
+        message.error("Invalid response from server");
+      }
     } catch (error) {
-      message.error(error.message);
+      console.error("Login error:", error);
+      
+      // Better error handling
+      if (error.response?.status === 401) {
+        message.error("Invalid email or password");
+      } else if (error.response?.data?.message) {
+        message.error(error.response.data.message);
+      } else if (!error.response) {
+        message.error("Network error - please check your connection");
+      } else {
+        message.error("Login failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
     }
   };
 
@@ -51,7 +104,10 @@ const LoginPage = () => {
                 placeholder='Enter your email address'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={loading}
                 className='modern-input'
+                type='email'
               />
             </div>
 
@@ -61,6 +117,8 @@ const LoginPage = () => {
                 placeholder='Enter your password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={loading}
                 iconRender={(visible) =>
                   visible ? (
                     <EyeOutlined className='password-icon' />
@@ -77,13 +135,20 @@ const LoginPage = () => {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className='modern-checkbox'
+                disabled={loading}
               >
                 Remember me
               </Checkbox>
             </div>
 
-            <Button type='primary' onClick={handleLogin} className='login-btn'>
-              Log In
+            <Button 
+              type='primary' 
+              onClick={handleLogin} 
+              className='login-btn'
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Log In"}
             </Button>
 
             <p className='signup-link'>

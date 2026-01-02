@@ -7,12 +7,15 @@ import Group from "./pages/group";
 import Tasks from "./pages/Tasks";
 import TasksAndGroups from "./pages/taskandgroup";
 import ProtectedRoute from "./components/protectrouter";
+import SignUpPage from "./pages/signuppage";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route index path="/login" element={<LoginPage />} />
+                <Route index path="/signup" element={<SignUpPage />} />
+
 
         <Route
           path="/"

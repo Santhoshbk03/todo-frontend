@@ -11,12 +11,9 @@ import {
   List,
 } from "antd";
 import {
-  TeamOutlined,
-  DashboardOutlined,
-  ClockCircleOutlined,
-  CheckCircleOutlined,
   ArrowUpOutlined,
   MoreOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   BarChart,
@@ -32,7 +29,6 @@ import {
   Legend,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
-import { baseurl } from "../helpers/url";
 import { fetchDashboardservice } from "../service/groupservice";
 
 const { Title, Text } = Typography;
@@ -41,28 +37,114 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     fetchDashboard();
   }, []);
 
-  const fetchDashboard = async () => {
+ const fetchDashboard = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
-      const token = localStorage.getItem("token");
+      console.log("🔄 Fetching dashboard data...");
+      
       const response = await fetchDashboardservice();
+      
+      console.log("📡 Full response:", response.data);
+
 
       
-      if (!response.ok) throw new Error("Failed to fetch dashboard");
-      const result = await response.json();
+      // Handle 304 Not Modified - force refresh
+      if (response.status === 304) {
+        console.log("🔄 304 Not Modified - forcing refresh...");
+        // Add cache busting parameter
+        const timestamp = new Date().getTime();
+        const refreshedResponse = await fetchDashboardservice(timestamp);
+        
+        if (refreshedResponse.ok) {
+          const result = await refreshedResponse.json();
+          console.log("✅ Refreshed dashboard data:", result);
+          setData(result);
+          return;
+        }
+      }
+      
+     
+      
+      
+      const result = response.data;
+      console.log("✅ Dashboard data received:", result);
+      
+      // Set the data directly (your API returns the data object directly)
       setData(result);
+      setError(null);
+      
     } catch (err) {
-      console.error("Dashboard error:", err.message);
+      console.error("❌ Dashboard fetch error:", err.message, err);
+      setError(err.message || "Failed to load dashboard");
+      
+    //   // Retry logic
+    //   if (retryCount < 2) {
+    //     setTimeout(() => {
+    //       console.log(`🔄 Retrying dashboard fetch (${retryCount + 1}/2)...`);
+    //       setRetryCount(prev => prev + 1);
+    //       fetchDashboard();
+    //     }, 1000 * (retryCount + 1));
+    //   }
     } finally {
       setLoading(false);
     }
   };
 
+
+  // Add this in your Dashboard component's JSX, before the return statement
+const testDirectApi = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${baseurl}/dashboard?t=${Date.now()}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Cache-Control": "no-cache"
+      }
+    });
+    const data = await response.json();
+    console.log("Direct API test:", data);
+    setData(data);
+  } catch (err) {
+    console.error("Direct API test failed:", err);
+  }
+};
+
+// Add a debug button in your header section:
+<div style={{ 
+  padding: "16px 0",
+  marginBottom: 20,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+}}>
+  <Title level={3} style={{ margin: 0 }}>Dashboard</Title>
+  <div>
+    <Button 
+      onClick={testDirectApi}
+      style={{ marginRight: 8 }}
+    >
+      Test API
+    </Button>
+    <Button 
+      icon={<ReloadOutlined />}
+      onClick={fetchDashboard}
+      loading={loading}
+    >
+      Refresh
+    </Button>
+  </div>
+</div>
+
+  // Fixed status colors - added all possible statuses from your data
   const priorityColors = {
     HIGH: "#ff4d4f",
     MEDIUM: "#faad14",
@@ -72,24 +154,130 @@ const Dashboard = () => {
   const statusColors = {
     TODO: "#1890ff",
     DONE: "#52c41a",
-    IN_PROGRESS: "#faad14",
+    'IN_PROGRESS': "#faad14",
+    PENDING: "#d4d4d4",
+  };
+
+  // Get status color with fallback
+  const getStatusColor = (status) => {
+    return statusColors[status] || "#1890ff";
+  };
+
+  // Get status display text
+  const getStatusText = (status) => {
+    const statusMap = {
+      'DONE': 'Done',
+      'IN_PROGRESS': 'In Progress',
+      'PENDING': 'Pending',
+      'TODO': 'To Do'
+    };
+    return statusMap[status] || status;
+  };
+
+  // Get avatar icon for status
+  const getStatusIcon = (status) => {
+    const iconMap = {
+      'DONE': '✓',
+      'IN_PROGRESS': '→',
+      'PENDING': '○',
+      'TODO': '○'
+    };
+    return iconMap[status] || '○';
   };
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "100px 0" }}>
+      <div style={{ 
+        textAlign: "center", 
+        padding: "100px 0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "60vh"
+      }}>
         <Spin size="large" />
         <Text type="secondary" style={{ display: "block", marginTop: 16 }}>
-          Loading dashboard...
+          {retryCount > 0 ? `Loading dashboard... (Retry ${retryCount}/3)` : "Loading dashboard..."}
         </Text>
+        {retryCount > 0 && (
+          <Text type="secondary" style={{ fontSize: 12, marginTop: 8 }}>
+            Taking longer than usual...
+          </Text>
+        )}
       </div>
     );
   }
 
-  const completionRate =
-    data?.tasks?.total > 0
-      ? Math.round((data.tasks.completed / data.tasks.total) * 100)
-      : 0;
+  if (error) {
+    return (
+      <div style={{ 
+        textAlign: "center", 
+        padding: "100px 0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "60vh"
+      }}>
+        <Text type="danger" style={{ fontSize: 16, marginBottom: 16 }}>
+          Failed to load dashboard
+        </Text>
+        <Text type="secondary" style={{ marginBottom: 24, maxWidth: 400 }}>
+          {error}
+        </Text>
+        <Button 
+          type="primary" 
+          icon={<ReloadOutlined />}
+          onClick={() => {
+            setRetryCount(0);
+            fetchDashboard();
+          }}
+          style={{ marginBottom: 8 }}
+        >
+          Retry
+        </Button>
+        <Button 
+          type="link" 
+          onClick={() => navigate("/")}
+        >
+          Go to Home
+        </Button>
+      </div>
+    );
+  }
+
+  // Handle case where data might be null or empty
+  if (!data || Object.keys(data).length === 0) {
+    return (
+      <div style={{ 
+        textAlign: "center", 
+        padding: "100px 0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "60vh"
+      }}>
+        <Text type="secondary" style={{ marginBottom: 16 }}>
+          No dashboard data available
+        </Text>
+        <Button 
+          type="primary" 
+          onClick={() => {
+            setRetryCount(0);
+            fetchDashboard();
+          }}
+        >
+          Load Dashboard
+        </Button>
+      </div>
+    );
+  }
+
+  console.log("🎨 Rendering dashboard with data:", data);
+
+  const completionRate = data?.tasks?.completionRate || 0;
 
   const statCards = [
     {
@@ -119,28 +307,64 @@ const Dashboard = () => {
   ];
 
   // Priority distribution data
-  const priorityData =
-    data?.priority?.map((p) => ({
-      name: p.priority.charAt(0) + p.priority.slice(1).toLowerCase(),
-      value: Number(p.count),
-      color: priorityColors[p.priority],
-    })) || [];
+  const priorityData = data?.priority?.map((p) => ({
+    name: p.priority?.charAt(0) + p.priority?.slice(1).toLowerCase() || 'Unknown',
+    value: Number(p.count || 0),
+    color: priorityColors[p.priority] || "#d9d9d9",
+  })) || [];
 
-  // Create chart data from tasks by day
-  const tasksByDay = {};
-  data?.recentTasks?.forEach((task) => {
-    const date = new Date(task.updated_at);
-    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-    tasksByDay[dayName] = (tasksByDay[dayName] || 0) + 1;
-  });
+  // Create chart data from weekly stats
+  let chartData = [];
+  
+  if (data?.weeklyStats && data.weeklyStats.length > 0) {
+    // Use weeklyStats from API
+    chartData = data.weeklyStats.map(week => ({
+      day: week.day,
+      value: week.total || 0,
+    }));
+  } else if (data?.recentTasks && data.recentTasks.length > 0) {
+    // Fallback: create from recent tasks
+    const tasksByDay = {};
+    data.recentTasks.forEach((task) => {
+      const date = new Date(task.updated_at || task.created_at);
+      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+      tasksByDay[dayName] = (tasksByDay[dayName] || 0) + 1;
+    });
 
-  const chartData = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => ({
-    day,
-    value: tasksByDay[day] || 0,
-  }));
+    chartData = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => ({
+      day,
+      value: tasksByDay[day] || 0,
+    }));
+  }
+
+  // Ensure we have at least some data for the chart
+  if (chartData.length === 0) {
+    chartData = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => ({
+      day,
+      value: 0,
+    }));
+  }
 
   return (
     <div style={{ background: "#f5f6fa", minHeight: "100vh", padding: 0 }}>
+      {/* Header with refresh button */}
+      <div style={{ 
+        padding: "16px 0",
+        marginBottom: 20,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}>
+        <Title level={3} style={{ margin: 0 }}>Dashboard</Title>
+        <Button 
+          icon={<ReloadOutlined />}
+          onClick={fetchDashboard}
+          loading={loading}
+        >
+          Refresh
+        </Button>
+      </div>
+
       {/* Stat Cards Row */}
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
         {statCards.map((stat, i) => (
@@ -249,8 +473,15 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="day" stroke="#fff" tick={{ fill: "#fff", fontSize: 12 }} />
-                <YAxis stroke="#fff" tick={{ fill: "#fff", fontSize: 12 }} />
+                <XAxis 
+                  dataKey="day" 
+                  stroke="#fff" 
+                  tick={{ fill: "#fff", fontSize: 12 }} 
+                />
+                <YAxis 
+                  stroke="#fff" 
+                  tick={{ fill: "#fff", fontSize: 12 }} 
+                />
                 <RechartsTooltip
                   contentStyle={{
                     background: "rgba(0,0,0,0.8)",
@@ -259,8 +490,15 @@ const Dashboard = () => {
                     color: "#fff",
                     fontSize: 12,
                   }}
+                  formatter={(value) => [`${value} tasks`, 'Count']}
+                  labelFormatter={(label) => `Day: ${label}`}
                 />
-                <Bar dataKey="value" fill="#fff" radius={[6, 6, 0, 0]} />
+                <Bar 
+                  dataKey="value" 
+                  fill="#fff" 
+                  radius={[6, 6, 0, 0]} 
+                  name="Tasks"
+                />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -290,12 +528,18 @@ const Dashboard = () => {
                     innerRadius={45}
                     outerRadius={75}
                     paddingAngle={5}
+                    label={(entry) => `${entry.name}: ${entry.value}`}
                   >
                     {priorityData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <RechartsTooltip />
+                  <RechartsTooltip 
+                    formatter={(value, name, props) => [
+                      `${value} tasks`, 
+                      props.payload.name
+                    ]}
+                  />
                   <Legend
                     verticalAlign="bottom"
                     iconType="circle"
@@ -333,43 +577,67 @@ const Dashboard = () => {
               <List
                 dataSource={data.recentTasks}
                 renderItem={(task) => (
-                  <List.Item style={{ padding: "10px 0", border: "none" }}>
+                  <List.Item 
+                    style={{ 
+                      padding: "10px 0", 
+                      border: "none",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => navigate(`/tasks/${task.id}`)}
+                  >
                     <List.Item.Meta
                       avatar={
                         <Avatar
                           size={40}
                           style={{
-                            background: statusColors[task.status] || "#1890ff",
+                            background: getStatusColor(task.status),
                             fontSize: 16,
+                            fontWeight: "bold",
                           }}
                         >
-                          {task.status === "DONE" ? "✓" : "○"}
+                          {getStatusIcon(task.status)}
                         </Avatar>
                       }
-                      title={<Text strong style={{ fontSize: 13 }}>{task.title}</Text>}
-                      description={
-                        <Text type="secondary" style={{ fontSize: 11 }}>
-                          {new Date(task.updated_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                      title={
+                        <Text strong style={{ fontSize: 13 }}>
+                          {task.title}
                         </Text>
+                      }
+                      description={
+                        <div>
+                          <Text type="secondary" style={{ fontSize: 11, display: "block" }}>
+                            {task.group_name || 'No Group'}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: 11 }}>
+                            {new Date(task.updated_at || task.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </Text>
+                        </div>
                       }
                     />
                     <Tag
-                      color={priorityColors[task.priority]}
+                      color={priorityColors[task.priority] || "#d9d9d9"}
                       style={{ borderRadius: 6, fontSize: 11 }}
                     >
-                      {task.priority}
+                      {task.priority || 'N/A'}
                     </Tag>
                   </List.Item>
                 )}
-                style={{height : "36vh",overflowY:"scroll"}}
+                style={{ height: "36vh", overflowY: "auto" }}
               />
             ) : (
               <div style={{ textAlign: "center", padding: "40px 0" }}>
                 <Text type="secondary">No recent tasks</Text>
+                <Button 
+                  type="link" 
+                  onClick={() => navigate("/tasks/new")}
+                  style={{ fontSize: 12, marginTop: 8 }}
+                >
+                  Create your first task
+                </Button>
               </div>
             )}
           </Card>
@@ -381,6 +649,13 @@ const Dashboard = () => {
             title={
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Text strong style={{ fontSize: 15 }}>Task Overview</Text>
+                <Button 
+                  type="link" 
+                  onClick={() => navigate("/tasks")}
+                  style={{ fontSize: 12 }}
+                >
+                  View All →
+                </Button>
               </div>
             }
             bordered={false}
@@ -429,35 +704,50 @@ const Dashboard = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody style={{height : "36vh",overflowY : "scroll"}}>
+                <tbody style={{ height: "36vh", overflowY: "auto", display: "block" }}>
                   {data?.recentTasks?.length > 0 ? (
-                    data.recentTasks.map((task, index) => (
-                      <tr key={task.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                        <td style={{ padding: "12px 16px" }}>
-                          <Text strong style={{ fontSize: 13 }}>
-                            {task.title}
-                          </Text>
+                    data.recentTasks.map((task) => (
+                      <tr 
+                        key={task.id} 
+                        style={{ 
+                          borderBottom: "1px solid #f0f0f0",
+                          cursor: "pointer",
+                          display: "table",
+                          width: "100%",
+                          tableLayout: "fixed"
+                        }}
+                        onClick={() => navigate(`/tasks/${task.id}`)}
+                      >
+                        <td style={{ padding: "12px 16px", width: "40%" }}>
+                          <div>
+                            <Text strong style={{ fontSize: 13, display: "block" }}>
+                              {task.title}
+                            </Text>
+                            <Text type="secondary" style={{ fontSize: 11 }}>
+                              {task.group_name || 'No Group'}
+                            </Text>
+                          </div>
                         </td>
-                        <td style={{ padding: "12px 16px" }}>
+                        <td style={{ padding: "12px 16px", width: "30%" }}>
                           <Tag
-                            color={statusColors[task.status]}
+                            color={getStatusColor(task.status)}
                             style={{ borderRadius: 6, fontSize: 11 }}
                           >
-                            {task.status}
+                            {getStatusText(task.status)}
                           </Tag>
                         </td>
-                        <td style={{ padding: "12px 16px", textAlign: "right" }}>
+                        <td style={{ padding: "12px 16px", textAlign: "right", width: "30%" }}>
                           <Tag
-                            color={priorityColors[task.priority]}
+                            color={priorityColors[task.priority] || "#d9d9d9"}
                             style={{ borderRadius: 6, fontSize: 11 }}
                           >
-                            {task.priority}
+                            {task.priority || 'N/A'}
                           </Tag>
                         </td>
                       </tr>
                     ))
                   ) : (
-                    <tr>
+                    <tr style={{ display: "table", width: "100%" }}>
                       <td colSpan={3} style={{ padding: "40px", textAlign: "center" }}>
                         <Text type="secondary">No tasks available</Text>
                       </td>

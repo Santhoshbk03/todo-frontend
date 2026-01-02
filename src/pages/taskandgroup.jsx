@@ -558,60 +558,59 @@ const TasksAndGroups = () => {
     setEditingCommentText("");
   };
 
-  // FILTER AND SORT TASKS
-  const getFilteredTasks = () => {
-    let filtered = [...tasks];
-    
-    // Filter by priority tab
-    if (activeTab !== "all") {
-      filtered = filtered.filter(task => task.priority === activeTab.toUpperCase());
+const getFilteredTasks = () => {
+  let filtered = [...tasks];
+  
+  filtered = filtered.filter(task => task != null);
+  
+  if (activeTab !== "all") {
+    filtered = filtered.filter(task => task.priority === activeTab.toUpperCase());
+  }
+  
+  if (searchQuery) {
+    filtered = filtered.filter(task =>
+      (task.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }
+  
+  // Filter by priority dropdown
+  if (priorityFilter !== "all") {
+    filtered = filtered.filter(task => task.priority === priorityFilter);
+  }
+  
+  // Filter by status dropdown
+  if (statusFilter !== "all") {
+    filtered = filtered.filter(task => task.status === statusFilter);
+  }
+  
+  // Filter by completion status
+  if (!showCompleted) {
+    filtered = filtered.filter(task => task.status !== "DONE");
+  }
+  
+  // Sort with defensive checks
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case "priority":
+        const priorityOrder = { HIGH: 1, MEDIUM: 2, LOW: 3 };
+        return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+      case "created":
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      case "title":
+        return (a.title || '').localeCompare(b.title || '');
+      case "due_date":
+        if (!a.due_date && !b.due_date) return 0;
+        if (!a.due_date) return 1;
+        if (!b.due_date) return -1;
+        return new Date(a.due_date) - new Date(b.due_date);
+      default:
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
     }
-    
-    // Filter by search
-    if (searchQuery) {
-      filtered = filtered.filter(task =>
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
-    
-    // Filter by priority dropdown
-    if (priorityFilter !== "all") {
-      filtered = filtered.filter(task => task.priority === priorityFilter);
-    }
-    
-    // Filter by status dropdown
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(task => task.status === statusFilter);
-    }
-    
-    // Filter by completion status
-    if (!showCompleted) {
-      filtered = filtered.filter(task => task.status !== "DONE");
-    }
-    
-    // Sort
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "priority":
-          const priorityOrder = { HIGH: 1, MEDIUM: 2, LOW: 3 };
-          return priorityOrder[a.priority] - priorityOrder[b.priority];
-        case "created":
-          return new Date(b.created_at) - new Date(a.created_at);
-        case "title":
-          return a.title.localeCompare(b.title);
-        case "due_date":
-          if (!a.due_date && !b.due_date) return 0;
-          if (!a.due_date) return 1;
-          if (!b.due_date) return -1;
-          return new Date(a.due_date) - new Date(b.due_date);
-        default:
-          return new Date(b.created_at) - new Date(a.created_at);
-      }
-    });
-    
-    return filtered;
-  };
+  });
+  
+  return filtered;
+};
 
   // Toggle task selection
   const toggleTaskSelection = (taskId) => {
@@ -675,24 +674,30 @@ const TasksAndGroups = () => {
   const activeTasks = filteredTasks.filter(t => t.status !== "DONE");
   const doneTasks = filteredTasks.filter(t => t.status === "DONE");
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "HIGH": return "#ff4d4f";
-      case "MEDIUM": return "#faad14";
-      case "LOW": return "#52c41a";
-      default: return "#1890ff";
-    }
-  };
+ const getPriorityColor = (priority) => {
+  if (!priority) return "#1890ff";
+  switch (priority) {
+    case "HIGH": return "#ff4d4f";
+    case "MEDIUM": return "#faad14";
+    case "LOW": return "#52c41a";
+    default: return "#1890ff";
+  }
+};
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "TODO": return "warning";
-      case "IN_PROGRESS": return "processing";
-      case "DONE": return "success";
-      default: return "default";
-    }
-  };
+const getStatusColor = (status) => {
+  if (!status) return "default";
+  switch (status) {
+    case "TODO": return "warning";
+    case "IN_PROGRESS": return "processing";
+    case "DONE": return "success";
+    default: return "default";
+  }
+};
 
+const isOverdue = (task) => {
+  if (!task || !task.due_date || task.status === "DONE") return false;
+  return new Date(task.due_date) < new Date();
+};
   const getPriorityIcon = (priority) => {
     switch (priority) {
       case "HIGH": return <FireOutlined />;
@@ -714,10 +719,7 @@ const TasksAndGroups = () => {
     return dueDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  const isOverdue = (task) => {
-    if (!task.due_date || task.status === "DONE") return false;
-    return new Date(task.due_date) < new Date();
-  };
+ 
 
   const formatCommentDate = (dateString) => {
     const date = new Date(dateString);
@@ -734,255 +736,274 @@ const TasksAndGroups = () => {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  // Task Item Component for List View
-  const TaskItem = ({ task, comments, isSelected }) => {
-    const isCompleted = task.status === "DONE";
-    
-    return (
-      <div className={`task-item ${isCompleted ? 'completed' : ''} ${isSelected ? 'selected' : ''}`} style={{
-        padding: "16px 0",
-        borderBottom: "1px solid #f0f0f0",
-        transition: "all 0.3s",
-      }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-          <Checkbox
-            checked={isSelected}
-            onChange={() => toggleTaskSelection(task.id)}
-            style={{ marginTop: 4 }}
-          />
-          
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <Tag 
-                color={getPriorityColor(task.priority)}
-                icon={getPriorityIcon(task.priority)}
-                style={{ margin: 0 }}
-              >
-                {task.priority}
+const TaskItem = ({ task, comments, isSelected }) => {
+  // Add defensive checks for undefined task
+  if (!task) return null;
+  
+  const taskId = task.id || '';
+  const taskTitle = task.title || 'Untitled Task';
+  const taskDescription = task.description || '';
+  const taskPriority = task.priority || 'MEDIUM';
+  const taskStatus = task.status || 'TODO';
+  const taskProgress = task.progress || 0;
+  const taskDueDate = task.due_date || null;
+  const isCompleted = taskStatus === 'DONE';
+  const taskComments = comments[taskId] || [];
+  
+  return (
+    <div className={`task-item ${isCompleted ? 'completed' : ''} ${isSelected ? 'selected' : ''}`} style={{
+      padding: "16px 0",
+      borderBottom: "1px solid #f0f0f0",
+      transition: "all 0.3s",
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <Checkbox
+          checked={isSelected}
+          onChange={() => toggleTaskSelection(taskId)}
+          style={{ marginTop: 4 }}
+        />
+        
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Tag 
+              color={getPriorityColor(taskPriority)}
+              icon={getPriorityIcon(taskPriority)}
+              style={{ margin: 0 }}
+            >
+              {taskPriority}
+            </Tag>
+            
+            <Text strong style={{ fontSize: 14 }}>
+              {taskTitle}
+            </Text>
+
+            {isOverdue(task) && (
+              <Tag color="red" icon={<WarningOutlined />}>
+                Overdue
               </Tag>
-              
-              <Text strong style={{ fontSize: 14 }}>
-                {task.title}
+            )}
+          </div>
+
+          {taskDescription && (
+            <Paragraph
+              type="secondary"
+              ellipsis={{ rows: 2 }}
+              style={{ margin: "8px 0", fontSize: 13, paddingLeft: 0 }}
+            >
+              {taskDescription}
+            </Paragraph>
+          )}
+
+          {/* Progress Bar */}
+          <div style={{ marginTop: 12, marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Progress</Text>
+              <Text strong style={{ fontSize: 12, color: getPriorityColor(taskPriority) }}>
+                {taskProgress}%
               </Text>
-
-              {isOverdue(task) && (
-                <Tag color="red" icon={<WarningOutlined />}>
-                  Overdue
-                </Tag>
-              )}
             </div>
+            <Tooltip title="Click to adjust progress">
+              <Slider
+                value={taskProgress}
+                onChange={(value) => updateTaskProgress(task, value)}
+                trackStyle={{ background: getPriorityColor(taskPriority) }}
+                handleStyle={{ borderColor: getPriorityColor(taskPriority) }}
+              />
+            </Tooltip>
+          </div>
 
-            {task.description && (
-              <Paragraph
-                type="secondary"
-                ellipsis={{ rows: 2 }}
-                style={{ margin: "8px 0", fontSize: 13, paddingLeft: 0 }}
-              >
-                {task.description}
-              </Paragraph>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            {taskDueDate && (
+              <Space size={4}>
+                <CalendarOutlined style={{ fontSize: 12, color: isOverdue(task) ? "#ff4d4f" : "#999" }} />
+                <Text 
+                  type={isOverdue(task) ? "danger" : "secondary"} 
+                  style={{ fontSize: 12 }}
+                >
+                  Due {formatDueDate(taskDueDate)}
+                </Text>
+              </Space>
             )}
 
-            {/* Progress Bar */}
-            <div style={{ marginTop: 12, marginBottom: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <Text type="secondary" style={{ fontSize: 12 }}>Progress</Text>
-                <Text strong style={{ fontSize: 12, color: getPriorityColor(task.priority) }}>
-                  {task.progress || 0}%
-                </Text>
-              </div>
-              <Tooltip title="Click to adjust progress">
-                <Slider
-                  value={task.progress || 0}
-                  onChange={(value) => updateTaskProgress(task, value)}
-                  trackStyle={{ background: getPriorityColor(task.priority) }}
-                  handleStyle={{ borderColor: getPriorityColor(task.priority) }}
-                />
-              </Tooltip>
-            </div>
+            {taskComments.length > 0 && (
+              <Button
+                type="link"
+                size="small"
+                icon={<MessageOutlined />}
+                onClick={() => openCommentModal(task)}
+                style={{ padding: 0, height: "auto" }}
+              >
+                {taskComments.length}
+              </Button>
+            )}
 
-            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-              {task.due_date && (
-                <Space size={4}>
-                  <CalendarOutlined style={{ fontSize: 12, color: isOverdue(task) ? "#ff4d4f" : "#999" }} />
-                  <Text 
-                    type={isOverdue(task) ? "danger" : "secondary"} 
-                    style={{ fontSize: 12 }}
-                  >
-                    Due {formatDueDate(task.due_date)}
-                  </Text>
-                </Space>
-              )}
-
-              {comments[task.id]?.length > 0 && (
-                <Button
-                  type="link"
-                  size="small"
-                  icon={<MessageOutlined />}
-                  onClick={() => openCommentModal(task)}
-                  style={{ padding: 0, height: "auto" }}
-                >
-                  {comments[task.id].length}
-                </Button>
-              )}
-
-              <Tag color={getStatusColor(task.status)}>
-                {task.status.replace("_", " ")}
-              </Tag>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Avatar size={32} icon={<UserOutlined />} style={{ background: "#1890ff" }} />
-            
-            <Dropdown
-              overlay={
-                <Menu>
-                  <Menu.Item icon={<EditOutlined />} onClick={() => openTaskModal(task)}>
-                    Edit Task
-                  </Menu.Item>
-                  <Menu.Item icon={<MessageOutlined />} onClick={() => openCommentModal(task)}>
-                    View Comments ({comments[task.id]?.length || 0})
-                  </Menu.Item>
-                  {!isCompleted && (
-                    <Menu.Item icon={<ArrowRightOutlined />} onClick={() => startTask(task.id)}>
-                      Start Task
-                    </Menu.Item>
-                  )}
-                  <Menu.Item icon={<CopyOutlined />} onClick={() => duplicateTask(task)}>
-                    Duplicate
-                  </Menu.Item>
-                  <Menu.Item icon={<InboxOutlined />} onClick={() => archiveTask(task.id)}>
-                    Archive
-                  </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Item 
-                    icon={<DeleteOutlined />} 
-                    danger
-                    onClick={() => {
-                      Modal.confirm({
-                        title: 'Delete Task',
-                        content: 'Are you sure you want to delete this task?',
-                        okText: 'Delete',
-                        okType: 'danger',
-                        onOk: () => handleTaskDelete(task.id),
-                      });
-                    }}
-                  >
-                    Delete
-                  </Menu.Item>
-                </Menu>
-              }
-              trigger={['click']}
-            >
-              <Button type="text" icon={<MoreOutlined />} />
-            </Dropdown>
+            <Tag color={getStatusColor(taskStatus)}>
+              {taskStatus.replace("_", " ")}
+            </Tag>
           </div>
         </div>
-      </div>
-    );
-  };
 
-  // Task Card Component for Grid View
-  const TaskCard = ({ task, comments }) => {
-    const isCompleted = task.status === "DONE";
-    
-    return (
-      <Card
-        size="small"
-        style={{
-          height: "100%",
-          borderRadius: 12,
-          border: `1px solid ${getPriorityColor(task.priority)}20`,
-        }}
-        bodyStyle={{ padding: 16 }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <Tag 
-                color={getPriorityColor(task.priority)}
-                style={{ margin: 0, fontSize: 10 }}
-              >
-                {task.priority}
-              </Tag>
-              {isOverdue(task) && (
-                <Tag color="red" style={{ fontSize: 10 }}>Overdue</Tag>
-              )}
-            </div>
-            <Text strong style={{ fontSize: 14 }} ellipsis>
-              {task.title}
-            </Text>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Avatar size={32} icon={<UserOutlined />} style={{ background: "#1890ff" }} />
+          
           <Dropdown
             overlay={
               <Menu>
                 <Menu.Item icon={<EditOutlined />} onClick={() => openTaskModal(task)}>
-                  Edit
+                  Edit Task
                 </Menu.Item>
                 <Menu.Item icon={<MessageOutlined />} onClick={() => openCommentModal(task)}>
-                  Comments ({comments[task.id]?.length || 0})
+                  View Comments ({taskComments.length})
                 </Menu.Item>
                 {!isCompleted && (
-                  <Menu.Item icon={<ArrowRightOutlined />} onClick={() => startTask(task.id)}>
-                    Start
+                  <Menu.Item icon={<ArrowRightOutlined />} onClick={() => startTask(taskId)}>
+                    Start Task
                   </Menu.Item>
                 )}
+                <Menu.Item icon={<CopyOutlined />} onClick={() => duplicateTask(task)}>
+                  Duplicate
+                </Menu.Item>
+                <Menu.Item icon={<InboxOutlined />} onClick={() => archiveTask(taskId)}>
+                  Archive
+                </Menu.Item>
+                <Menu.Divider />
+                <Menu.Item 
+                  icon={<DeleteOutlined />} 
+                  danger
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Delete Task',
+                      content: 'Are you sure you want to delete this task?',
+                      okText: 'Delete',
+                      okType: 'danger',
+                      onOk: () => handleTaskDelete(taskId),
+                    });
+                  }}
+                >
+                  Delete
+                </Menu.Item>
               </Menu>
             }
+            trigger={['click']}
           >
-            <Button type="text" icon={<MoreOutlined />} size="small" />
+            <Button type="text" icon={<MoreOutlined />} />
           </Dropdown>
         </div>
-        
-        {task.description && (
-          <Paragraph
-            type="secondary"
-            ellipsis={{ rows: 3 }}
-            style={{ fontSize: 12, marginBottom: 12 }}
-          >
-            {task.description}
-          </Paragraph>
-        )}
-        
-        <div style={{ marginBottom: 12 }}>
-          <Progress 
-            percent={task.progress || 0} 
-            size="small" 
-            strokeColor={getPriorityColor(task.priority)}
-            showInfo={false}
-          />
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-            <Text type="secondary" style={{ fontSize: 11 }}>Progress</Text>
-            <Text strong style={{ fontSize: 11, color: getPriorityColor(task.priority) }}>
-              {task.progress || 0}%
-            </Text>
-          </div>
-        </div>
-        
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-          <Space size={4}>
-            <Tag color={getStatusColor(task.status)} style={{ fontSize: 10 }}>
-              {task.status.replace("_", " ")}
+      </div>
+    </div>
+  );
+};
+
+const TaskCard = ({ task, comments }) => {
+  if (!task) return null;
+  
+  const taskId = task.id || '';
+  const taskTitle = task.title || 'Untitled Task';
+  const taskDescription = task.description || '';
+  const taskPriority = task.priority || 'MEDIUM';
+  const taskStatus = task.status || 'TODO';
+  const taskProgress = task.progress || 0;
+  const taskDueDate = task.due_date || null;
+  const isCompleted = taskStatus === 'DONE';
+  const taskComments = comments[taskId] || [];
+  
+  return (
+    <Card
+      size="small"
+      style={{
+        height: "100%",
+        borderRadius: 12,
+        border: `1px solid ${getPriorityColor(taskPriority)}20`,
+      }}
+      bodyStyle={{ padding: 16 }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Tag 
+              color={getPriorityColor(taskPriority)}
+              style={{ margin: 0, fontSize: 10 }}
+            >
+              {taskPriority}
             </Tag>
-            {task.due_date && (
-              <Text type="secondary" style={{ fontSize: 11 }}>
-                <CalendarOutlined /> {formatDueDate(task.due_date)}
-              </Text>
+            {isOverdue(task) && (
+              <Tag color="red" style={{ fontSize: 10 }}>Overdue</Tag>
             )}
-          </Space>
-          
-          {!isCompleted && (
-            <Button
-              size="small"
-              type="primary"
-              icon={<CheckOutlined />}
-              onClick={() => toggleTaskStatus(task)}
-            />
-          )}
+          </div>
+          <Text strong style={{ fontSize: 14 }} ellipsis>
+            {taskTitle}
+          </Text>
         </div>
-      </Card>
-    );
-  };
+        <Dropdown
+          overlay={
+            <Menu>
+              <Menu.Item icon={<EditOutlined />} onClick={() => openTaskModal(task)}>
+                Edit
+              </Menu.Item>
+              <Menu.Item icon={<MessageOutlined />} onClick={() => openCommentModal(task)}>
+                Comments ({taskComments.length})
+              </Menu.Item>
+              {!isCompleted && (
+                <Menu.Item icon={<ArrowRightOutlined />} onClick={() => startTask(taskId)}>
+                  Start
+                </Menu.Item>
+              )}
+            </Menu>
+          }
+        >
+          <Button type="text" icon={<MoreOutlined />} size="small" />
+        </Dropdown>
+      </div>
+      
+      {taskDescription && (
+        <Paragraph
+          type="secondary"
+          ellipsis={{ rows: 3 }}
+          style={{ fontSize: 12, marginBottom: 12 }}
+        >
+          {taskDescription}
+        </Paragraph>
+      )}
+      
+      <div style={{ marginBottom: 12 }}>
+        <Progress 
+          percent={taskProgress} 
+          size="small" 
+          strokeColor={getPriorityColor(taskPriority)}
+          showInfo={false}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+          <Text type="secondary" style={{ fontSize: 11 }}>Progress</Text>
+          <Text strong style={{ fontSize: 11, color: getPriorityColor(taskPriority) }}>
+            {taskProgress}%
+          </Text>
+        </div>
+      </div>
+      
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+        <Space size={4}>
+          <Tag color={getStatusColor(taskStatus)} style={{ fontSize: 10 }}>
+            {taskStatus.replace("_", " ")}
+          </Tag>
+          {taskDueDate && (
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              <CalendarOutlined /> {formatDueDate(taskDueDate)}
+            </Text>
+          )}
+        </Space>
+        
+        {!isCompleted && (
+          <Button
+            size="small"
+            type="primary"
+            icon={<CheckOutlined />}
+            onClick={() => toggleTaskStatus(task)}
+          />
+        )}
+      </div>
+    </Card>
+  );
+};
 
   return (
     <div style={{ padding: "0", background: "#fafafa", minHeight: "100vh" }}>
