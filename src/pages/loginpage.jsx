@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Input, Button, Checkbox, message } from "antd";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
-import "../styles/Loginpage.css";
+import "../styles/loginpage.css";
 import axios from "axios";
 import { baseurl } from "../helpers/url";
 import { useNavigate } from "react-router-dom";
