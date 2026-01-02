@@ -1,1 +1,1 @@
-export const baseurl = "https://todo-backend-6st4.onrender.com/api"
+export const baseurl =  process.env.REACT_APP_API_URL || import.meta.env.VITE_API_URL
