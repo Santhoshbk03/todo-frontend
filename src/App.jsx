@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/loginpage";
 
-import ProtectedRoute from "./components/protectrouter.jsx";
 import Dashboard from "./pages/dashboard";
 import MainLayout from "./components/MainLayout";
 import Group from "./pages/group";
 import Tasks from "./pages/Tasks";
 import TasksAndGroups from "./pages/taskandgroup";
+import ProtectedRoute from "./components/protectrouter";
 
 const App = () => {
   return (
