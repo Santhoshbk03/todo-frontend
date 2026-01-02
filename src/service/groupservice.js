@@ -1,45 +1,59 @@
 import axios from "axios";
 import { baseurl } from "../helpers/url";
 
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-};
+const axiosInstance = axios.create({
+  baseURL: baseurl,
+});
 
-// Group APIs
-export const getGroupsApi = () =>
-  axios.get(`${baseurl}/groups`, getAuthHeader());
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    
+    if (token && token !== "null" && token !== "undefined") {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("No valid token found for request:", config.url);
+    }
+    
+    if (!config.headers["Content-Type"]) {
+      config.headers["Content-Type"] = "application/json";
+    }
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-export const createGroupApi = (data) =>
-  axios.post(`${baseurl}/groups`, data, getAuthHeader());
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userdetails");
+      
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
-export const updateGroupApi = (id, data) =>
-  axios.put(`${baseurl}/groups/${id}`, data, getAuthHeader());
+export const getGroupsApi = () => axiosInstance.get("/groups");
+export const createGroupApi = (data) => axiosInstance.post("/groups", data);
+export const updateGroupApi = (id, data) => axiosInstance.put(`/groups/${id}`, data);
+export const deleteGroupApi = (id) => axiosInstance.delete(`/groups/${id}`);
 
-export const deleteGroupApi = (id) =>
-  axios.delete(`${baseurl}/groups/${id}`, getAuthHeader());
+export const getTasksByGroupApi = (groupId) => 
+  axiosInstance.get(`/tasks/group/${groupId}`);
+export const createTaskApi = (data) => axiosInstance.post("/tasks", data);
+export const updateTaskApi = (id, data) => axiosInstance.put(`/tasks/${id}`, data);
+export const deleteTaskApi = (id) => axiosInstance.delete(`/tasks/${id}`);
 
-// Task APIs
-export const getTasksByGroupApi = (groupId) =>
-  axios.get(`${baseurl}/tasks/group/${groupId}`, getAuthHeader());
+export const fetchDashboardservice = () => axiosInstance.get("/dashboard");
 
-export const createTaskApi = (data) =>
-  axios.post(`${baseurl}/tasks`, data, getAuthHeader());
+export const loginservice = (body) => axios.post(`${baseurl}/auth/login`, body);
 
-export const updateTaskApi = (id, data) =>
-  axios.put(`${baseurl}/tasks/${id}`, data, getAuthHeader());
-
-export const deleteTaskApi = (id) =>
-  axios.delete(`${baseurl}/tasks/${id}`, getAuthHeader());
-
-
-export const fetchDashboardservice = (id) =>
-  axios.get(`${baseurl}/dashboard`, getAuthHeader());
-
-
-export const loginservice = (body) =>
-  axios.post(`${baseurl}/auth/login`,body);
+export default axiosInstance;
