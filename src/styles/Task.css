@@ -1,0 +1,524 @@
+/* Linear Tasks Container */
+.linear-tasks-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #f5f7fa;
+  /* min-height: 100vh; */
+  height: 77vh;
+  overflow: scroll;
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header-left .app-title {
+  margin: 0;
+  background: linear-gradient(45deg, #ffffff, #52c41a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-right .ant-btn {
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Stats Bar */
+.stats-bar {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.stat-content {
+  text-align: center;
+}
+
+.stat-card.completed-stat {
+  border-top: 3px solid #52c41a;
+}
+
+.stat-card.progress-stat {
+  border-top: 3px solid #1890ff;
+}
+
+.stat-card.overdue-stat {
+  border-top: 3px solid #f5222d;
+}
+
+/* Sidebar */
+.sidebar-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.sidebar-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-header .ant-typography {
+  margin: 0 !important;
+}
+
+/* Groups List */
+.groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.group-item:hover {
+  background: #f0f7ff;
+  border-color: #1890ff;
+}
+
+.group-item.active {
+  background: #1890ff;
+  color: white;
+}
+
+.group-item.active:hover {
+  background: #40a9ff;
+}
+
+.group-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.group-stats {
+  font-size: 12px;
+}
+
+/* Quick Actions */
+.quick-actions {
+  margin-top: 24px;
+}
+
+.quick-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-task {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #fffbe6;
+  border-radius: 8px;
+  border: 1px solid #ffe58f;
+}
+
+/* Main Content Card */
+.main-content-card {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-height: 600px;
+}
+
+/* Controls Bar */
+.controls-bar {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Batch Actions */
+.batch-actions {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f6ffed;
+  border-radius: 8px;
+  border: 1px solid #b7eb8f;
+}
+
+/* Tasks Container */
+.tasks-container {
+  min-height: 400px;
+}
+
+/* Task Item */
+.task-item {
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.task-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #1890ff;
+}
+
+.task-item.selected {
+  background: #f0f7ff;
+  border-color: #1890ff;
+}
+
+.task-item.completed {
+  background: #f6ffed;
+  opacity: 0.8;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+  color: #8c8c8c;
+}
+
+.task-main {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.task-select {
+  padding-top: 4px;
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.task-title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-status-icon {
+  font-size: 16px;
+}
+
+.task-status-icon.completed {
+  color: #52c41a;
+}
+
+.task-status-icon.in-progress {
+  color: #1890ff;
+  animation: pulse 1.5s infinite;
+}
+
+.task-status-icon.todo {
+  color: #faad14;
+}
+
+.task-tags .ant-tag {
+  margin: 0;
+}
+
+.task-meta {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.task-progress {
+  margin-top: 16px;
+  max-width: 300px;
+}
+
+.task-actions {
+  flex-shrink: 0;
+}
+
+/* Tasks Grid */
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.task-card {
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.task-card-title {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.task-card-meta {
+  margin-top: 12px;
+}
+
+.task-card-actions {
+  margin-top: 12px;
+}
+
+/* Comments */
+.quick-comment-input {
+  animation: slideDown 0.3s ease-out;
+}
+
+.comments-view {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.comment-input-section {
+  margin-bottom: 24px;
+}
+
+.comment-item {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 3px solid #1890ff;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.comment-content {
+  padding-left: 32px;
+  line-height: 1.6;
+}
+
+/* History View */
+.history-view {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.history-item {
+  padding: 12px 0;
+}
+
+/* Loading States */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  min-height: 400px;
+}
+
+/* Empty States */
+.ant-empty {
+  padding: 80px 0;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.task-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .linear-tasks-container {
+    padding: 16px;
+  }
+  
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .stats-bar .ant-row {
+    gap: 12px;
+  }
+  
+  .task-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .task-main {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .task-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1890ff;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #40a9ff;
+}
+
+/* Modal Overrides */
+.ant-modal-content {
+  border-radius: 16px !important;
+}
+
+.ant-modal-header {
+  border-radius: 16px 16px 0 0 !important;
+}
+
+/* Focus States */
+.ant-input:focus,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Button Hover Effects */
+.ant-btn:hover {
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
+}
+
+/* Tag Styles */
+.ant-tag-processing {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+}
+
+.ant-tag-success {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #52c41a;
+}
+
+.ant-tag-warning {
+  background: #fffbe6;
+  border-color: #ffe58f;
+  color: #faad14;
+}
+
+.ant-tag-red {
+  background: #fff1f0;
+  border-color: #ffa39e;
+  color: #f5222d;
+}
+
+.ant-tag-blue {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+}
+
+.ant-tag-green {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #52c41a;
+}

@@ -1,0 +1,70 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/loginpage";
+
+import ProtectedRoute from "./components/protectrouter";
+import Dashboard from "./pages/dashboard";
+import MainLayout from "./components/MainLayout";
+import Group from "./pages/group";
+import Tasks from "./pages/Tasks";
+import TasksAndGroups from "./pages/taskandgroup";
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/groups"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Group />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <TasksAndGroups />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+       
+
+
+
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;

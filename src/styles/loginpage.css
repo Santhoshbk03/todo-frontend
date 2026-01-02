@@ -1,0 +1,464 @@
+/* styles/LoginPage.css */
+
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #f5f7ff;
+}
+
+/* Form Side */
+.login-form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2vh;
+  background: white;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: min(480px, 90vw);
+  padding: clamp(20px, 3vw, 40px);
+}
+
+.logo {
+  margin-bottom: clamp(30px, 5vw, 50px);
+}
+
+.logo-icon {
+  width: clamp(48px, 10vw, 68px);
+  height: clamp(48px, 10vw, 68px);
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  border-radius: clamp(12px, 2vw, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 800;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+}
+
+.welcome-title {
+  font-size: 2vw;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: clamp(8px, 2vw, 12px);
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.welcome-subtitle {
+  font-size:1vw;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: clamp(32px, 5vw, 48px);
+  font-weight: 400;
+}
+
+.form-group {
+  margin-bottom: clamp(20px, 4vw, 28px);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: clamp(8px, 2vw, 10px);
+  font-weight: 500;
+  color: #1f2937;
+  font-size: clamp(14px, 3vw, 15px);
+}
+
+.modern-input {
+  height: clamp(48px, 10vw, 54px) !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  font-size: clamp(14px, 3vw, 15px) !important;
+  padding: 0 clamp(16px, 4vw, 18px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.modern-input:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+  outline: none !important;
+}
+
+.password-icon {
+  color: #9ca3af;
+  font-size: clamp(16px, 4vw, 18px);
+}
+
+.options-row {
+  margin-bottom: clamp(30px, 5vw, 40px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modern-checkbox {
+  font-size: clamp(14px, 3vw, 15px);
+  color: #6b7280;
+}
+
+.modern-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+
+.login-btn {
+  width: 100%;
+  height: clamp(48px, 10vw, 56px);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: clamp(15px, 4vw, 17px);
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(139, 92, 246, 0.4);
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: clamp(24px, 4vw, 32px);
+  font-size: clamp(14px, 3vw, 15px);
+  color: #6b7280;
+}
+
+.signup-link a {
+  color: #8b5cf6;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.signup-link a:hover {
+  background: rgba(139, 92, 246, 0.1);
+  text-decoration: underline;
+}
+
+/* Decorative Side */
+.decorative-side {
+  flex: 1;
+  background: linear-gradient(155deg, #4c1d95 0%, #6d28d9 30%, #8b5cf6 60%, #a78bfa 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glass Orbs */
+.glass-orb {
+  position: absolute;
+  border-radius: 50%;
+  backdrop-filter: blur(80px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 0 60px rgba(139, 92, 246, 0.4),
+    inset 0 0 40px rgba(255, 255, 255, 0.1);
+  animation: floatGlow 12s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: min(380px, 50vw);
+  height: min(380px, 50vw);
+  top: -120px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: min(500px, 60vw);
+  height: min(500px, 60vw);
+  bottom: -200px;
+  right: -150px;
+  animation-delay: 4s;
+  background: rgba(167, 139, 250, 0.15);
+}
+
+.orb-3 {
+  width: min(280px, 40vw);
+  height: min(280px, 40vw);
+  top: 20%;
+  right: 10%;
+  animation-delay: 8s;
+  background: rgba(139, 92, 246, 0.2);
+}
+
+/* Floating Particles */
+.floating-particle {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite;
+}
+
+.particle-1 {
+  width: min(12px, 2vw);
+  height: min(12px, 2vw);
+  top: 15%;
+  left: 20%;
+  animation-delay: 1s;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+}
+
+.particle-2 {
+  width: min(20px, 3vw);
+  height: min(20px, 3vw);
+  top: 60%;
+  right: 25%;
+  animation-delay: 3s;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.particle-3 {
+  width: min(16px, 2.5vw);
+  height: min(16px, 2.5vw);
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 6s;
+  background: rgba(167, 139, 250, 0.6);
+}
+
+/* Accent Lines */
+.accent-line {
+  position: absolute;
+  width: min(300px, 40vw);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.4), transparent);
+  border-radius: 50%;
+  animation: pulseLine 8s ease-in-out infinite;
+}
+
+.line-1 {
+  top: 30%;
+  left: 10%;
+  transform: rotate(30deg);
+}
+
+.line-2 {
+  bottom: 35%;
+  right: 15%;
+  transform: rotate(-45deg);
+  width: min(400px, 50vw);
+}
+
+/* Hero Content */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+  max-width: min(520px, 80vw);
+  padding: clamp(20px, 4vw, 40px);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hero-content h2 {
+  font-size: clamp(28px, 6vw, 42px);
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: clamp(16px, 4vw, 24px);
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #ffffff, #e0d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.hero-content p {
+  font-size: clamp(16px, 4vw, 19px);
+  opacity: 0.95;
+  line-height: 1.8;
+  font-weight: 400;
+}
+
+/* Accent Icon */
+.accent-icon {
+  position: absolute;
+  font-size: clamp(100px, 20vw, 180px);
+  opacity: 0.08;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: slowRotate 40s linear infinite;
+}
+
+/* Animations */
+@keyframes floatGlow {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-40px) translateX(30px) scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-40px) rotate(15deg);
+  }
+}
+
+@keyframes pulseLine {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slowRotate {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) {
+  .login-form-wrapper {
+    max-width: min(420px, 85vw);
+  }
+}
+
+@media (max-width: 992px) {
+  .login-form-wrapper {
+    max-width: min(380px, 90vw);
+  }
+  
+  .hero-content h2 {
+    font-size: clamp(24px, 5vw, 36px);
+  }
+  
+  .hero-content p {
+    font-size: clamp(14px, 3.5vw, 17px);
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .decorative-side {
+    display: none;
+  }
+  
+  .login-form-side {
+    min-height: 100vh;
+    padding: 2vh;
+  }
+  
+  .login-form-wrapper {
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-side {
+    padding: 16px;
+  }
+  
+  .login-form-wrapper {
+    padding: 20px;
+  }
+  
+  .logo {
+    margin-bottom: 30px;
+  }
+  
+  .welcome-subtitle {
+    margin-bottom: 36px;
+  }
+  
+  .modern-input {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Tablet Landscape */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .login-container {
+    flex-direction: row;
+  }
+  
+  .decorative-side {
+    display: flex;
+  }
+  
+  .hero-content {
+    max-width: 90%;
+  }
+  
+  .hero-content h2 {
+    font-size: clamp(24px, 4vw, 32px);
+  }
+  
+  .hero-content p {
+    font-size: clamp(14px, 2.5vw, 16px);
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .modern-input,
+  .login-btn {
+    border-width: 0.5px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .login-form-side {
+    background: #111827;
+  }
+  
+  .welcome-title {
+    color: #f9fafb;
+  }
+  
+  .welcome-subtitle {
+    color: #9ca3af;
+  }
+  
+  .form-group label {
+    color: #f3f4f6;
+  }
+  
+  .modern-input {
+    background: #1f2937;
+    border-color: #374151 !important;
+    color: #f9fafb;
+  }
+  
+  .modern-input::placeholder {
+    color: #9ca3af;
+  }
+}
